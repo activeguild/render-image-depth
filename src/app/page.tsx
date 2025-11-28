@@ -216,7 +216,7 @@ export default function Home() {
                 サンプル画像
               </button>
               
-              <button 
+              {/* <button 
                 onClick={(e) => {
                   e.stopPropagation();
                   setImageSrc('/sample.jpg');
@@ -225,7 +225,7 @@ export default function Home() {
                 className="w-full px-2.5 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-[10px] text-green-400 transition-colors"
               >
                 深度マップ使用
-              </button>
+              </button> */}
             </div>
           )}
 
