@@ -39,25 +39,26 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen p-8 flex flex-col items-center gap-8 max-w-7xl mx-auto">
-      <header className="w-full flex flex-col items-center gap-4 mb-8">
-        <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 text-center">
-          3D Depth Visualizer
-        </h1>
-        <p className="text-gray-400 text-lg max-w-2xl text-center">
-          Upload an image to generate a depth map and view it in 3D. 
-          Powered by AI depth estimation.
-        </p>
-      </header>
+    <main className="h-screen w-screen overflow-hidden bg-gradient-to-br from-gray-900 via-black to-gray-900 flex">
+      {/* Left Sidebar - Compact */}
+      <aside className="w-[280px] h-full flex flex-col border-r border-white/10 bg-black/30 backdrop-blur-sm">
+        {/* Header */}
+        <header className="p-3 border-b border-white/10">
+          <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
+            3D Depth Visualizer
+          </h1>
+          <p className="text-gray-400 text-[10px] mt-0.5">
+            AI-powered depth estimation
+          </p>
+        </header>
 
-      <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-8 h-[600px]">
-        {/* Left Column: Controls & Preview */}
-        <div className="flex flex-col gap-6 lg:col-span-1 h-full">
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-3">
           
           {/* Upload Section */}
           <div 
             className={clsx(
-              "flex-1 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center p-6 transition-all cursor-pointer group",
+              "border-2 border-dashed rounded-lg flex flex-col items-center justify-center p-3 transition-all cursor-pointer group h-[120px]",
               imageSrc ? "border-gray-600 bg-gray-900/50" : "border-blue-500/50 hover:border-blue-400 hover:bg-blue-500/10"
             )}
             onClick={() => fileInputRef.current?.click()}
@@ -71,158 +72,158 @@ export default function Home() {
             />
             
             {imageSrc ? (
-              <div className="relative w-full h-full flex items-center justify-center overflow-hidden rounded-lg">
+              <div className="relative w-full h-full flex items-center justify-center overflow-hidden rounded">
                 <img src={imageSrc} alt="Original" className="max-w-full max-h-full object-contain" />
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-medium">
-                  Click to Change Image
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-medium">
+                  画像を変更
                 </div>
               </div>
             ) : (
               <>
-                <div className="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <Upload className="w-8 h-8 text-blue-400" />
-                </div>
-                <p className="text-lg font-medium text-gray-300">Upload Image</p>
-                <p className="text-sm text-gray-500 mt-2">JPG, PNG, WebP</p>
-                <div className="flex flex-col gap-2 mt-4 z-10">
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setImageSrc('/sample.jpg');
-                      setDepthMapSrc(null);
-                      setIsProcessing(true);
-                      DepthEstimator.estimateDepth('/sample.jpg')
-                        .then(setDepthMapSrc)
-                        .catch(err => {
-                          console.error(err);
-                          alert('Error: ' + err.message);
-                        })
-                        .finally(() => setIsProcessing(false));
-                    }}
-                    className="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm text-blue-400 transition-colors"
-                  >
-                    Use Sample Image (Generate Depth)
-                  </button>
-                  
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setImageSrc('/sample.jpg');
-                      setDepthMapSrc('/image.webp');
-                    }}
-                    className="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm text-green-400 transition-colors"
-                  >
-                    Use image.webp as Depth Map
-                  </button>
-
-                   <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setImageSrc('/image.webp');
-                      setDepthMapSrc(null);
-                      setIsProcessing(true);
-                       DepthEstimator.estimateDepth('/image.webp')
-                        .then(setDepthMapSrc)
-                        .catch(err => {
-                          console.error(err);
-                          alert('Error: ' + err.message);
-                        })
-                        .finally(() => setIsProcessing(false));
-                    }}
-                    className="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm text-purple-400 transition-colors"
-                  >
-                    Use image.webp as Source (Generate Depth)
-                  </button>
-                </div>
+                <Upload className="w-6 h-6 text-blue-400 mb-1.5" />
+                <p className="text-xs font-medium text-gray-300">画像アップロード</p>
+                <p className="text-[10px] text-gray-500 mt-0.5">JPG, PNG, WebP</p>
               </>
             )}
           </div>
 
           {/* Depth Map Preview */}
-          <div className="flex-1 bg-gray-900/50 rounded-2xl border border-white/10 p-4 flex flex-col relative overflow-hidden">
-            <div className="flex items-center gap-2 mb-2 text-gray-400 text-sm font-medium uppercase tracking-wider">
-              <Layers className="w-4 h-4" />
-              Depth Map
+          <div className="bg-gray-900/50 rounded-lg border border-white/10 p-2">
+            <div className="flex items-center gap-1.5 mb-1.5 text-gray-400 text-[10px] font-medium">
+              <Layers className="w-2.5 h-2.5" />
+              深度マップ
             </div>
             
-            <div className="flex-1 flex items-center justify-center bg-black/40 rounded-lg overflow-hidden relative">
+            <div className="h-[100px] flex items-center justify-center bg-black/40 rounded overflow-hidden">
               {isProcessing ? (
-                <div className="flex flex-col items-center gap-3">
-                  <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
-                  <span className="text-sm text-purple-400 animate-pulse">Generating Depth...</span>
+                <div className="flex flex-col items-center gap-1.5">
+                  <Loader2 className="w-4 h-4 text-purple-500 animate-spin" />
+                  <span className="text-[10px] text-purple-400">生成中...</span>
                 </div>
               ) : depthMapSrc ? (
                 <img src={depthMapSrc} alt="Depth Map" className="max-w-full max-h-full object-contain" />
               ) : (
-                <div className="text-gray-600 text-sm text-center px-4">
-                  Depth map will appear here after upload
-                </div>
+                <div className="text-gray-600 text-[10px]">深度マップ</div>
               )}
             </div>
           </div>
 
           {/* Controls */}
-          <div className="bg-gray-900/50 rounded-2xl border border-white/10 p-6 space-y-6">
-             <div>
-               <label className="flex items-center justify-between mb-4">
-                  <span className="text-gray-300 font-medium flex items-center gap-2">
-                    <Box className="w-4 h-4 text-pink-400" />
-                    Displacement Scale
-                  </span>
-                  <span className="text-pink-400 font-mono">{displacementScale.toFixed(1)}</span>
-               </label>
-               <input 
-                 type="range" 
-                 min="0" 
-                 max="5" 
-                 step="0.1" 
-                 value={displacementScale} 
-                 onChange={(e) => setDisplacementScale(parseFloat(e.target.value))}
-                 className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-pink-500"
-               />
-             </div>
+          <div className="bg-gray-900/50 rounded-lg border border-white/10 p-2.5 space-y-2.5">
+            <div>
+              <label className="flex items-center justify-between mb-1.5">
+                <span className="text-gray-300 text-[10px] font-medium flex items-center gap-1">
+                  <Box className="w-2.5 h-2.5 text-pink-400" />
+                  Scale
+                </span>
+                <input 
+                  type="number" 
+                  min="0" 
+                  max="5" 
+                  step="0.1" 
+                  value={displacementScale} 
+                  onChange={(e) => setDisplacementScale(parseFloat(e.target.value) || 0)}
+                  className="w-12 px-1 py-0.5 bg-gray-800 border border-gray-700 rounded text-pink-400 font-mono text-[10px] text-right focus:outline-none focus:border-pink-500"
+                />
+              </label>
+              <input 
+                type="range" 
+                min="0" 
+                max="5" 
+                step="0.1" 
+                value={displacementScale} 
+                onChange={(e) => setDisplacementScale(parseFloat(e.target.value))}
+                className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-pink-500"
+              />
+            </div>
 
-             <div>
-               <label className="flex items-center justify-between mb-4">
-                  <span className="text-gray-300 font-medium flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-blue-400" />
-                    Layer Count
-                  </span>
-                  <span className="text-blue-400 font-mono">{layerCount}</span>
-               </label>
-               <input 
-                 type="range" 
-                 min="3" 
-                 max="20" 
-                 step="1" 
-                 value={layerCount} 
-                 onChange={(e) => setLayerCount(parseInt(e.target.value))}
-                 className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
-               />
-             </div>
+            <div>
+              <label className="flex items-center justify-between mb-1.5">
+                <span className="text-gray-300 text-[10px] font-medium flex items-center gap-1">
+                  <Layers className="w-2.5 h-2.5 text-blue-400" />
+                  Layers
+                </span>
+                <input 
+                  type="number" 
+                  min="2" 
+                  max="20" 
+                  step="1" 
+                  value={layerCount} 
+                  onChange={(e) => setLayerCount(parseInt(e.target.value) || 2)}
+                  className="w-12 px-1 py-0.5 bg-gray-800 border border-gray-700 rounded text-blue-400 font-mono text-[10px] text-right focus:outline-none focus:border-blue-500"
+                />
+              </label>
+              <input 
+                type="range" 
+                min="2" 
+                max="20" 
+                step="1" 
+                value={layerCount} 
+                onChange={(e) => setLayerCount(parseInt(e.target.value))}
+                className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+              />
+            </div>
           </div>
 
-        </div>
+          {/* Sample Buttons */}
+          {!imageSrc && (
+            <div className="space-y-1.5">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setImageSrc('/sample.jpg');
+                  setDepthMapSrc(null);
+                  setIsProcessing(true);
+                  DepthEstimator.estimateDepth('/sample.jpg')
+                    .then(setDepthMapSrc)
+                    .catch(err => {
+                      console.error(err);
+                      alert('Error: ' + err.message);
+                    })
+                    .finally(() => setIsProcessing(false));
+                }}
+                className="w-full px-2.5 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-[10px] text-blue-400 transition-colors"
+              >
+                サンプル画像
+              </button>
+              
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setImageSrc('/sample.jpg');
+                  setDepthMapSrc('/image.webp');
+                }}
+                className="w-full px-2.5 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-[10px] text-green-400 transition-colors"
+              >
+                深度マップ使用
+              </button>
+            </div>
+          )}
 
-        {/* Right Column: 3D Scene */}
-        <div className="lg:col-span-2 h-full relative">
-           {imageSrc && depthMapSrc ? (
-             <Scene 
-               imageSrc={imageSrc} 
-               depthMapSrc={depthMapSrc} 
-               displacementScale={displacementScale}
-               layerCount={layerCount}
-             />
-           ) : (
-             <div className="w-full h-full bg-gray-900/30 rounded-xl border-2 border-dashed border-gray-800 flex flex-col items-center justify-center text-gray-600 gap-4">
-               <div className="w-20 h-20 rounded-full bg-gray-800/50 flex items-center justify-center">
-                 <ImageIcon className="w-10 h-10 opacity-50" />
-               </div>
-               <p>3D Preview will be available after processing</p>
-             </div>
-           )}
         </div>
-      </div>
+      </aside>
+
+      {/* Main Content - 3D Preview */}
+      <main className="flex-1 h-full p-4 flex items-center justify-center overflow-hidden">
+        {imageSrc && depthMapSrc ? (
+          <div className="w-full h-full">
+            <Scene
+              imageSrc={imageSrc}
+              depthMapSrc={depthMapSrc}
+              displacementScale={displacementScale}
+              layerCount={layerCount}
+            />
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center text-gray-600 gap-3">
+            <div className="w-20 h-20 rounded-full bg-gray-800/50 flex items-center justify-center">
+              <ImageIcon className="w-10 h-10 opacity-50" />
+            </div>
+            <p className="text-base">3Dプレビュー</p>
+            <p className="text-xs text-gray-500">画像をアップロードしてください</p>
+          </div>
+        )}
+      </main>
     </main>
   );
 }

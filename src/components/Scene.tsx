@@ -81,7 +81,7 @@ function LayeredImageMesh({ imageSrc, depthMapSrc, displacementScale = 1, layerC
       texture.needsUpdate = true;
       
       layerTextures.push(texture);
-      layerDepths.push((avgDepth / 255) * displacementScale);
+      layerDepths.push((avgDepth / 255) * displacementScale * 3);
     }
 
     return { textures: layerTextures, depths: layerDepths, planeWidth, planeHeight };
@@ -108,14 +108,35 @@ function LayeredImageMesh({ imageSrc, depthMapSrc, displacementScale = 1, layerC
 export default function Scene({ imageSrc, depthMapSrc, displacementScale = 2, layerCount = 5 }: SceneProps) {
   return (
     <div className="w-full h-full bg-black/50 rounded-xl overflow-hidden shadow-2xl border border-white/10">
-      <Canvas>
+      <Canvas
+        frameloop="demand"
+        dpr={[1, 2]}
+        gl={{
+          preserveDrawingBuffer: true,
+          antialias: true
+        }}
+        camera={{
+          position: [0, 5, 5],
+          fov: 50,
+          near: 0.1,
+          far: 1000
+        }}
+        style={{ width: '100%', height: '100%', display: 'block' }}
+      >
         <Suspense fallback={null}>
-          <PerspectiveCamera makeDefault position={[0, 5, 5]} fov={50} />
-          <OrbitControls enableDamping />
+          <OrbitControls 
+            enableDamping={false} 
+            autoRotate={false}
+            enableZoom={true}
+            enablePan={true}
+            enableRotate={true}
+            makeDefault={true}
+            minDistance={1}
+            maxDistance={10}
+          />
           
           <ambientLight intensity={0.5} />
           <directionalLight position={[10, 10, 5]} intensity={1} />
-          <Environment preset="studio" />
 
           <LayeredImageMesh 
             imageSrc={imageSrc} 
