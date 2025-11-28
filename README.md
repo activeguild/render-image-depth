@@ -2,6 +2,9 @@
 
 A Next.js application that transforms 2D images into interactive 3D visualizations using AI-powered depth estimation. Upload an image, generate a depth map, and explore it in a beautiful 3D layered representation.
 
+<img width="1681" height="935" alt="スクリーンショット 2025-11-28 22 52 43" src="https://github.com/user-attachments/assets/39aab6a9-6f1d-44e3-a99a-3e29f67dedd8" />
+
+
 ## Features
 
 - **Image Upload**: Drag and drop or select an image from your device
