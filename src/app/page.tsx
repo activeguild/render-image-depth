@@ -15,6 +15,7 @@ export default function Home() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [displacementScale, setDisplacementScale] = useState(1.5);
   const [layerCount, setLayerCount] = useState(5);
+  const [depthTolerance, setDepthTolerance] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -143,24 +144,51 @@ export default function Home() {
                   <Layers className="w-2.5 h-2.5 text-blue-400" />
                   Layers
                 </span>
-                <input 
-                  type="number" 
-                  min="2" 
-                  max="20" 
-                  step="1" 
-                  value={layerCount} 
+                <input
+                  type="number"
+                  min="2"
+                  max="20"
+                  step="1"
+                  value={layerCount}
                   onChange={(e) => setLayerCount(parseInt(e.target.value) || 2)}
                   className="w-12 px-1 py-0.5 bg-gray-800 border border-gray-700 rounded text-blue-400 font-mono text-[10px] text-right focus:outline-none focus:border-blue-500"
                 />
               </label>
-              <input 
-                type="range" 
-                min="2" 
-                max="20" 
-                step="1" 
-                value={layerCount} 
+              <input
+                type="range"
+                min="2"
+                max="20"
+                step="1"
+                value={layerCount}
                 onChange={(e) => setLayerCount(parseInt(e.target.value))}
                 className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="flex items-center justify-between mb-1.5">
+                <span className="text-gray-300 text-[10px] font-medium flex items-center gap-1">
+                  <Box className="w-2.5 h-2.5 text-purple-400" />
+                  Tolerance
+                </span>
+                <input
+                  type="number"
+                  min="0"
+                  max="50"
+                  step="1"
+                  value={depthTolerance}
+                  onChange={(e) => setDepthTolerance(parseFloat(e.target.value) || 0)}
+                  className="w-12 px-1 py-0.5 bg-gray-800 border border-gray-700 rounded text-purple-400 font-mono text-[10px] text-right focus:outline-none focus:border-purple-500"
+                />
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="50"
+                step="1"
+                value={depthTolerance}
+                onChange={(e) => setDepthTolerance(parseFloat(e.target.value))}
+                className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
               />
             </div>
           </div>
@@ -212,6 +240,7 @@ export default function Home() {
               depthMapSrc={depthMapSrc}
               displacementScale={displacementScale}
               layerCount={layerCount}
+              depthTolerance={depthTolerance}
             />
           </div>
         ) : (

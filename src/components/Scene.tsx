@@ -11,9 +11,10 @@ interface SceneProps {
   depthMapSrc: string;
   displacementScale?: number;
   layerCount?: number;
+  depthTolerance?: number;
 }
 
-function LayeredImageMesh({ imageSrc, depthMapSrc, displacementScale = 1, layerCount = 5 }: SceneProps & { layerCount: number }) {
+function LayeredImageMesh({ imageSrc, depthMapSrc, displacementScale = 1, layerCount = 5, depthTolerance = 0 }: SceneProps & { layerCount: number; depthTolerance: number }) {
   const [colorMap, depthMap] = useLoader(TextureLoader, [imageSrc, depthMapSrc]);
 
   const layers = useMemo(() => {
@@ -55,14 +56,14 @@ function LayeredImageMesh({ imageSrc, depthMapSrc, displacementScale = 1, layerC
       const layerImageData = layerCtx.createImageData(width, height);
       const layerData = layerImageData.data;
 
-      const minDepth = (layer / layerCount) * 255;
-      const maxDepth = ((layer + 1) / layerCount) * 255;
+      const minDepth = Math.max(0, (layer / layerCount) * 255 - depthTolerance);
+      const maxDepth = Math.min(255, ((layer + 1) / layerCount) * 255 + depthTolerance);
       const avgDepth = (minDepth + maxDepth) / 2;
 
-      // Copy pixels that fall within this depth range
+      // Copy pixels that fall within this depth range (with tolerance)
       for (let i = 0; i < depthData.length; i += 4) {
         const depth = (depthData[i] + depthData[i + 1] + depthData[i + 2]) / 3;
-        
+
         if (depth >= minDepth && depth < maxDepth) {
           layerData[i] = colorData[i];       // R
           layerData[i + 1] = colorData[i + 1]; // G
@@ -85,7 +86,7 @@ function LayeredImageMesh({ imageSrc, depthMapSrc, displacementScale = 1, layerC
     }
 
     return { textures: layerTextures, depths: layerDepths, planeWidth, planeHeight };
-  }, [colorMap, depthMap, layerCount, displacementScale]);
+  }, [colorMap, depthMap, layerCount, displacementScale, depthTolerance]);
 
   return (
     <group rotation={[-Math.PI / 2, 0, 0]}>
@@ -105,7 +106,7 @@ function LayeredImageMesh({ imageSrc, depthMapSrc, displacementScale = 1, layerC
   );
 }
 
-export default function Scene({ imageSrc, depthMapSrc, displacementScale = 2, layerCount = 5 }: SceneProps) {
+export default function Scene({ imageSrc, depthMapSrc, displacementScale = 2, layerCount = 5, depthTolerance = 0 }: SceneProps) {
   return (
     <div className="w-full h-full bg-black/50 rounded-xl overflow-hidden shadow-2xl border border-white/10">
       <Canvas
@@ -138,11 +139,12 @@ export default function Scene({ imageSrc, depthMapSrc, displacementScale = 2, la
           <ambientLight intensity={0.5} />
           <directionalLight position={[10, 10, 5]} intensity={1} />
 
-          <LayeredImageMesh 
-            imageSrc={imageSrc} 
-            depthMapSrc={depthMapSrc} 
+          <LayeredImageMesh
+            imageSrc={imageSrc}
+            depthMapSrc={depthMapSrc}
             displacementScale={displacementScale}
             layerCount={layerCount}
+            depthTolerance={depthTolerance}
           />
         </Suspense>
       </Canvas>
