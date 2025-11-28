@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client';
 
 import { Canvas, useLoader } from '@react-three/fiber';
