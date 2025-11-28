@@ -104,7 +104,7 @@ export default function Home() {
               ) : depthMapSrc ? (
                 <img src={depthMapSrc} alt="Depth Map" className="max-w-full max-h-full object-contain" />
               ) : (
-                <div className="text-gray-600 text-[10px]">深度マップ</div>
+                // <div className="text-gray-600 text-[10px]">深度マップ</div>
               )}
             </div>
           </div>
