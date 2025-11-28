@@ -118,13 +118,18 @@ export default function Home() {
                   <Box className="w-2.5 h-2.5 text-pink-400" />
                   Scale
                 </span>
-                <input 
-                  type="number" 
-                  min="0" 
-                  max="5" 
-                  step="0.1" 
-                  value={displacementScale} 
-                  onChange={(e) => setDisplacementScale(parseFloat(e.target.value) || 0)}
+                <input
+                  type="number"
+                  min="0"
+                  max="5"
+                  step="0.1"
+                  value={displacementScale}
+                  onChange={(e) => {
+                    const num = parseFloat(e.target.value);
+                    if (!isNaN(num) && num >= 0 && num <= 500) {
+                      setDisplacementScale(num);
+                    }
+                  }}
                   className="w-12 px-1 py-0.5 bg-gray-800 border border-gray-700 rounded text-pink-400 font-mono text-[10px] text-right focus:outline-none focus:border-pink-500"
                 />
               </label>
@@ -151,7 +156,13 @@ export default function Home() {
                   max="20"
                   step="1"
                   value={layerCount}
-                  onChange={(e) => setLayerCount(parseInt(e.target.value) || 2)}
+
+                  onChange={(e) => {
+                    const num = parseInt(e.target.value);
+                    if (!isNaN(num) && num >= 2 && num <= 2000) {
+                      setLayerCount(num);
+                    }
+                  }}
                   className="w-12 px-1 py-0.5 bg-gray-800 border border-gray-700 rounded text-blue-400 font-mono text-[10px] text-right focus:outline-none focus:border-blue-500"
                 />
               </label>
@@ -178,7 +189,12 @@ export default function Home() {
                   max="50"
                   step="1"
                   value={depthTolerance}
-                  onChange={(e) => setDepthTolerance(parseFloat(e.target.value) || 0)}
+                  onChange={(e) => {
+                    const num = parseFloat(e.target.value);
+                    if (!isNaN(num) && num >= 0 && num <= 5000) {
+                      setDepthTolerance(num);
+                    }
+                  }}
                   className="w-12 px-1 py-0.5 bg-gray-800 border border-gray-700 rounded text-purple-400 font-mono text-[10px] text-right focus:outline-none focus:border-purple-500"
                 />
               </label>
