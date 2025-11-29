@@ -134,7 +134,7 @@ export default function Scene({ imageSrc, depthMapSrc, displacementScale = 2, la
             enableRotate={true}
             makeDefault={true}
             minDistance={1}
-            maxDistance={10}
+            maxDistance={200}
           />
           
           <ambientLight intensity={0.5} />
