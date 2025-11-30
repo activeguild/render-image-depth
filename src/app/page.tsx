@@ -1,13 +1,10 @@
 'use client';
 
 import { useState, useRef, ChangeEvent } from 'react';
-import dynamic from 'next/dynamic';
-import { Upload, Loader2, Layers, Image as ImageIcon, Box } from 'lucide-react';
+import { Upload, Loader2, Layers, Image as ImageIcon, Box, Download } from 'lucide-react';
 import { DepthEstimator } from '@/utils/depth';
 import clsx from 'clsx';
-
-// Dynamically import the Scene component to avoid SSR issues
-const Scene = dynamic(() => import('@/components/Scene'), { ssr: false });
+import Scene, { type SceneHandle } from '@/components/Scene';
 
 export default function Home() {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -17,6 +14,7 @@ export default function Home() {
   const [layerCount, setLayerCount] = useState(5);
   const [depthTolerance, setDepthTolerance] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const sceneRef = useRef<SceneHandle>(null);
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -210,10 +208,28 @@ export default function Home() {
             </div>
           </div>
 
+          {/* Download GLB Button */}
+          {imageSrc && depthMapSrc && (
+            <button
+              onClick={() => {
+                console.log('Button clicked, sceneRef:', sceneRef.current);
+                if (!sceneRef.current) {
+                  alert('Scene is not ready yet. Please wait a moment and try again.');
+                  return;
+                }
+                sceneRef.current.exportGLB();
+              }}
+              className="w-full px-3 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 rounded-lg text-xs font-medium text-white transition-all flex items-center justify-center gap-2 shadow-lg"
+            >
+              <Download className="w-3.5 h-3.5" />
+              GLBダウンロード
+            </button>
+          )}
+
           {/* Sample Buttons */}
           {!imageSrc && (
             <div className="space-y-1.5">
-              <button 
+              <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setImageSrc('/sample.jpg');
@@ -231,8 +247,8 @@ export default function Home() {
               >
                 サンプル画像
               </button>
-              
-              {/* <button 
+
+              {/* <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setImageSrc('/sample.jpg');
@@ -253,6 +269,7 @@ export default function Home() {
         {imageSrc && depthMapSrc ? (
           <div className="w-full h-full">
             <Scene
+              ref={sceneRef}
               imageSrc={imageSrc}
               depthMapSrc={depthMapSrc}
               displacementScale={displacementScale}

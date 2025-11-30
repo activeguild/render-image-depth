@@ -1,11 +1,12 @@
 // @ts-nocheck
 'use client';
 
-import { Canvas, useLoader } from '@react-three/fiber';
+import { Canvas, useLoader, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment } from '@react-three/drei';
 import { TextureLoader, CanvasTexture } from 'three';
-import { Suspense, useMemo } from 'react';
+import { Suspense, useMemo, forwardRef, useImperativeHandle, useRef } from 'react';
 import * as THREE from 'three';
+import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
 
 interface SceneProps {
   imageSrc: string;
@@ -15,8 +16,14 @@ interface SceneProps {
   depthTolerance?: number;
 }
 
-function SmoothDepthMesh({ imageSrc, depthMapSrc, displacementScale = 1 }: Omit<SceneProps, 'layerCount' | 'depthTolerance'>) {
-  const [colorMap, depthMap] = useLoader(TextureLoader, [imageSrc, depthMapSrc]);
+export interface SceneHandle {
+  exportGLB: () => void;
+}
+
+const SmoothDepthMesh = forwardRef<THREE.Mesh, Omit<SceneProps, 'layerCount' | 'depthTolerance'>>(
+  ({ imageSrc, depthMapSrc, displacementScale = 1 }, ref) => {
+    const [colorMap, depthMap] = useLoader(TextureLoader, [imageSrc, depthMapSrc]);
+    const meshRef = useRef<THREE.Mesh>(null!);
 
   const { geometry, alphaMap } = useMemo(() => {
     const { width, height } = colorMap.image;
@@ -108,64 +115,123 @@ function SmoothDepthMesh({ imageSrc, depthMapSrc, displacementScale = 1 }: Omit<
     return { geometry, alphaMap: alphaTexture };
   }, [colorMap, depthMap, displacementScale]);
 
+    useImperativeHandle(ref, () => meshRef.current);
+
+    return (
+      <group rotation={[-Math.PI / 2, 0, 0]}>
+        <mesh ref={meshRef} geometry={geometry}>
+          <meshStandardMaterial
+            map={colorMap}
+            alphaMap={alphaMap}
+            transparent={true}
+            alphaTest={0.01}
+            side={THREE.DoubleSide}
+            flatShading={false}
+            roughness={0.8}
+            metalness={0.1}
+          />
+        </mesh>
+      </group>
+    );
+  }
+);
+
+function SceneContent({ meshRef }: { meshRef: React.RefObject<THREE.Mesh> }) {
+  const { scene } = useThree();
+
   return (
-    <group rotation={[-Math.PI / 2, 0, 0]}>
-      <mesh geometry={geometry}>
-        <meshStandardMaterial
-          map={colorMap}
-          alphaMap={alphaMap}
-          transparent={true}
-          alphaTest={0.01}
-          side={THREE.DoubleSide}
-          flatShading={false}
-          roughness={0.8}
-          metalness={0.1}
-        />
-      </mesh>
-    </group>
+    <>
+      <OrbitControls
+        enableDamping={false}
+        autoRotate={false}
+        enableZoom={true}
+        enablePan={true}
+        enableRotate={true}
+        makeDefault={true}
+        minDistance={1}
+        maxDistance={200}
+      />
+
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[10, 10, 5]} intensity={1} />
+    </>
   );
 }
 
-export default function Scene({ imageSrc, depthMapSrc, displacementScale = 2, layerCount = 5, depthTolerance = 0 }: SceneProps) {
-  return (
-    <div className="w-full h-full bg-black/50 rounded-xl overflow-hidden shadow-2xl border border-white/10">
-      <Canvas
-        frameloop="demand"
-        dpr={[1, 2]}
-        gl={{
-          preserveDrawingBuffer: true,
-          antialias: true
-        }}
-        camera={{
-          position: [0, 5, 5],
-          fov: 50,
-          near: 0.1,
-          far: 1000
-        }}
-        style={{ width: '100%', height: '100%', display: 'block' }}
-      >
-        <Suspense fallback={null}>
-          <OrbitControls 
-            enableDamping={false} 
-            autoRotate={false}
-            enableZoom={true}
-            enablePan={true}
-            enableRotate={true}
-            makeDefault={true}
-            minDistance={1}
-            maxDistance={200}
-          />
-          
-          <ambientLight intensity={0.5} />
-          <directionalLight position={[10, 10, 5]} intensity={1} />
+const Scene = forwardRef<SceneHandle, SceneProps>(
+  ({ imageSrc, depthMapSrc, displacementScale = 2, layerCount = 5, depthTolerance = 0 }, ref) => {
+    const meshRef = useRef<THREE.Mesh>(null);
 
-          <SmoothDepthMesh
-            imageSrc={imageSrc}
-            depthMapSrc={depthMapSrc}
-            displacementScale={displacementScale}
-          />
-        </Suspense>
-      </Canvas>
-    </div>
-  );
-}
+    useImperativeHandle(ref, () => ({
+      exportGLB: () => {
+        console.log('exportGLB called, meshRef.current:', meshRef.current);
+
+        if (!meshRef.current) {
+          console.error('Mesh not ready for export');
+          alert('Mesh not ready for export. Please wait a moment.');
+          return;
+        }
+
+        console.log('Starting GLB export...');
+        const exporter = new GLTFExporter();
+
+        exporter.parse(
+          meshRef.current,
+          (gltf) => {
+            console.log('GLB export successful, creating download...');
+            const blob = new Blob([gltf as ArrayBuffer], { type: 'model/gltf-binary' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `depth-model-${Date.now()}.glb`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            console.log('Download triggered');
+          },
+          (error) => {
+            console.error('Error exporting GLB:', error);
+            alert('Error exporting GLB: ' + error);
+          },
+          { binary: true }
+        );
+      },
+    }));
+
+    return (
+      <div className="w-full h-full bg-black/50 rounded-xl overflow-hidden shadow-2xl border border-white/10">
+        <Canvas
+          frameloop="demand"
+          dpr={[1, 2]}
+          gl={{
+            preserveDrawingBuffer: true,
+            antialias: true
+          }}
+          camera={{
+            position: [0, 5, 5],
+            fov: 50,
+            near: 0.1,
+            far: 1000
+          }}
+          style={{ width: '100%', height: '100%', display: 'block' }}
+        >
+          <Suspense fallback={null}>
+            <SceneContent meshRef={meshRef} />
+
+            <SmoothDepthMesh
+              ref={meshRef}
+              imageSrc={imageSrc}
+              depthMapSrc={depthMapSrc}
+              displacementScale={displacementScale}
+            />
+          </Suspense>
+        </Canvas>
+      </div>
+    );
+  }
+);
+
+Scene.displayName = 'Scene';
+
+export default Scene;
